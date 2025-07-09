@@ -4,6 +4,8 @@ from aiogram import F
 from aiogram import Router
 
 from Middlewares.PrivateChatMiddleware import PrivateChatMiddleware
+from StatusFilter import StatusFilter
+
 
 router = Router()
 router.message.middleware(PrivateChatMiddleware())
@@ -15,12 +17,14 @@ VALUES.append("6609070015")
 VALUES.append("4")
 
 
-@router.message(F.text.contains("Назад")) #, StatusFilter("1"))
+@router.message(F.text.contains("Назад"), StatusFilter(2))
 async def SendMessageClaim(message: Message):
     # global STATUS
     # STATUS = 0
     # from SQLite.InsertValues import InsertValues
     # await InsertValues("requests", values=VALUES)
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 1)
     from Structures.MainMenu import OutputMainMenu
     await OutputMainMenu(message)
 

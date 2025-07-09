@@ -10,5 +10,5 @@ class AdminMiddleware(BaseMiddleware):
                        data: Dict[str, Any]) -> Any:
         if event.from_user.id != 6609070015 and event.from_user.id != 919436925:
             return
-
+        print(f"[{event.from_user.id}] {event.text}")
         return await handler(event, data)

@@ -1,0 +1,41 @@
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
+from aiogram import F
+
+from aiogram import Router
+
+from Middlewares.PrivateChatMiddleware import PrivateChatMiddleware
+from StatusFilter import StatusFilter
+
+
+router = Router()
+router.message.middleware(PrivateChatMiddleware())
+
+
+@router.message(F.text.contains("Назад"), StatusFilter(2))
+async def ButtonBack(message: Message):
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 1)
+    from Structures.MainMenu import OutputMainMenu
+    await OutputMainMenu(message)
+
+
+@router.message(F.text.contains("Создать"), StatusFilter(2))
+async def ButtonCreate(message: Message):
+    from SQLite.InsertValues import InsertValues
+    await InsertValues("requests", (message.from_user.id, "4", "-", "-", "-", "-", "-"))
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 3)
+    from SQLite.SelectValues import FindMaxRequest
+    UpdateValue(message.from_user.id, "users", "request", str(FindMaxRequest(message.from_user.id)))
+    from Structures.InputFormMenu import OutputInputFormMenu
+    await OutputInputFormMenu(message)
+
+
+async def OutputClaimToPlayer(message: Message):
+    kb = [
+        [KeyboardButton(text="Создать новую жалобу")],
+        [KeyboardButton(text="Назад")]
+    ]
+    placeholder = "Выберите жалобу:"
+    Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
+    await message.answer("<b>[Жалоба на игрока]</b>:", reply_markup=Keys)

@@ -25,6 +25,5 @@ async def BadPhoto(message: Message):
 @router.message()
 async def BadMessage(message: Message):
     # await message.bot.send_message("-1002691896200", message.text, message_thread_id=4)
-    print(message.from_user.id)
     await message.answer("<b>Не пойму...</b> что ты вводишь?")
     await message.answer_sticker("CAACAgIAAxkBAAEHoX1mucVzt3Z7abLiXoLUUS6Rf2lxNgACEAADwDZPE-qBiinxHwLoNQQ")

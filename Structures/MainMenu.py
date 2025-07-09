@@ -4,32 +4,40 @@ from aiogram import F
 from aiogram import Router
 
 from Middlewares.PrivateChatMiddleware import PrivateChatMiddleware
+from StatusFilter import StatusFilter
 
 router = Router()
 router.message.middleware(PrivateChatMiddleware())
 
 
-@router.message(F.text.contains("Отправить жалобу")) #, StatusFilter("1"))
+@router.message(F.text.contains("Отправить жалобу"), StatusFilter(1))
 async def SendMessageClaim(message: Message):
-
-    from Structures.SendMessageMenu import OutputSendMessageMenu
-    await OutputSendMessageMenu(message)
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 2)
+    from Structures.ClaimToPlayerMenu import OutputClaimToPlayer
+    await OutputClaimToPlayer(message)
 
 
 async def OutputMainMenu(message: Message):
 
-    sep = "-------------------------------------------------------\n"
-    text = ("   [<b>Добро пожаловать в главное меню!</b>]\n   Здесь <i>Вы</i> можете отправить жалобу на игрока "
-            "и-и-и... <b>пока</b> на этом всё. Но это тестовая секретная разработка!!\n"
-            "   Примечание: Данное приветствующее сообщение будет показываться лишь 1-н раз для "
-            "новых пользователей бота, при повторном нажатии на /start не будет показываться. (Не реализовано ещё)\n")
-    await message.answer(sep + text + sep)
+    from SQLite.SelectValues import FindAnyRowUsers
+    if FindAnyRowUsers(message.from_user.id, "oMainMenu") == 0:
+        sep = "-------------------------------------------------------\n"
+        text = ("   [<b>fraysad!</b>]\n   Новое обновление бота. Считай, что v0.2. Что изменилось? Можешь посмотреть "
+                "сам увидеть и потрогать!\n   Во-первых, это сообщение ты увидишь единожды, если опять нажмёшь "
+                "/start, или вернёшься в меню, то его больше не увидишь. Тут можно написать приветствие или "
+                "кратко объяснить суть бота. \n   Во-вторых, я таки сделал первый образец составления жалобы. "
+                "Как только нажмёшь 'Создать запрос', то ты увидишь 6 кнопок (пока что), после каждой из них "
+                "будет написано '-'. Нажимай на каждую кнопку, и вводи интересующуюся информацию. В результате "
+                "увидишь что изменится. Созданный запрос ты не увидишь, зато увижу я. Он создаётся в базу данных и "
+                "там лежит. Опять же, это ещё сырая версия, считай, что это лишь скелет того, как будет"
+                " работать.\n")
+        await message.answer(sep + text + sep)
+        from SQLite.UpdateValues import UpdateValue
+        UpdateValue(message.from_user.id, "users", "oMainMenu", 1)
 
     kb = [
         [KeyboardButton(text="Отправить жалобу")]
-        # [KeyboardButton(text=f"{emojiList[3]}Факультатив"), KeyboardButton(text=f"{emojiList[3]}Поиск")],
-        # [KeyboardButton(text=f"{emojiList[2]}Настройки")],
-        # [KeyboardButton(text=f"{emojiList[4]}Поменять группу: {userGroup}")]
     ]
     placeholder = "Выберите желаемое действие:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)

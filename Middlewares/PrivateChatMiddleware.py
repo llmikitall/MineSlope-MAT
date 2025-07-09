@@ -11,5 +11,5 @@ class PrivateChatMiddleware(BaseMiddleware):
                        data: Dict[str, Any]) -> Any:
         if event.chat.type != "private":
             return
-
+        print(f"[{event.from_user.id}] {event.text}")
         return await handler(event, data)
