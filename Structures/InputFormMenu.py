@@ -14,6 +14,7 @@ router.message.middleware(PrivateChatMiddleware())
 @router.message(F.text.contains("Назад"), StatusFilter(3))
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "request", "-")
     UpdateValue(message.from_user.id, "users", "status", 2)
     from Structures.ClaimToPlayerMenu import OutputClaimToPlayer
     await OutputClaimToPlayer(message)
@@ -59,6 +60,14 @@ async def ButtonBack(message: Message):
     await OutputBox5Menu(message)
 
 
+@router.message(F.text.contains("Подробности"), StatusFilter(3))
+async def ButtonBack(message: Message):
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 36)
+    from Structures.Box6Menu import OutputBox6Menu
+    await OutputBox6Menu(message)
+
+
 async def OutputInputFormMenu(message: Message):
     from SQLite.SelectValues import SelectBoxsRequest, FindAnyRowUsers
     boxs = SelectBoxsRequest(FindAnyRowUsers(message.from_user.id, "request"))
@@ -68,6 +77,7 @@ async def OutputInputFormMenu(message: Message):
         [KeyboardButton(text=f"Тип нарушения: {boxs[2]}")],
         [KeyboardButton(text=f"Координаты: {boxs[3]}")],
         [KeyboardButton(text=f"Доказательства: {boxs[4]}")],
+        [KeyboardButton(text=f"Подробности: {boxs[5]}")],
         [KeyboardButton(text=f"Назад = Сохранить (пока что)")]
     ]
     placeholder = "Выберите жалобу:"

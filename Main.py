@@ -8,8 +8,8 @@ from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 
 import Commands
-from Structures import StartMenu, MainMenu, SendMessageMenu, BadMessage, ClaimToPlayerMenu, InputFormMenu, Box1Menu, \
-    Box3Menu, Box2Menu, Box4Menu, Box5Menu
+from Structures import StartMenu, MainMenu, BadMessage, ClaimToPlayerMenu, InputFormMenu, Box1Menu, \
+    Box3Menu, Box2Menu, Box4Menu, Box5Menu, Box6Menu
 
 
 async def main():
@@ -43,6 +43,7 @@ async def main():
     DP.include_router(Box3Menu.router)
     DP.include_router(Box4Menu.router)
     DP.include_router(Box5Menu.router)
+    DP.include_router(Box6Menu.router)
     DP.include_router(BadMessage.router)
 
     logging.basicConfig(stream=sys.stdout)

@@ -15,6 +15,7 @@ async def CreateTableRequests():
                             box3 TEXT,
                             box4 TEXT,
                             box5 TEXT,
+                            box6 TEXT,
                             FOREIGN KEY (userID)
                                 REFERENCES users(userID)
                                 ON DELETE CASCADE

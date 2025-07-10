@@ -11,7 +11,7 @@ router.message.middleware(PrivateChatMiddleware())
 @router.message(CommandStart())
 async def CommandStart(message: Message):
     from SQLite.SelectValues import FindExitsRow
-    if await FindExitsRow("users", "userID", [message.from_user.id]) == 0:
+    if await FindExitsRow("users", "userID", message.from_user.id) == 0:
         from SQLite.InsertValues import InsertValues
         await InsertValues("users", [message.from_user.id])
     from Structures.MainMenu import OutputMainMenu

@@ -22,7 +22,7 @@ async def ButtonBack(message: Message):
 @router.message(F.text.contains("Создать"), StatusFilter(2))
 async def ButtonCreate(message: Message):
     from SQLite.InsertValues import InsertValues
-    await InsertValues("requests", (message.from_user.id, "4", "-", "-", "-", "-", "-"))
+    await InsertValues("requests", (message.from_user.id, "4", "-", "-", "-", "-", "-", "-"))
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 3)
     from SQLite.SelectValues import FindMaxRequest
@@ -31,11 +31,35 @@ async def ButtonCreate(message: Message):
     await OutputInputFormMenu(message)
 
 
+@router.message(F.text.contains("Запрос №"), StatusFilter(2))
+async def ButtonRequest(message: Message):
+    ID = message.text.split("№")
+    from SQLite.SelectValues import SelectRequestsUser
+    listing = SelectRequestsUser(message.from_user.id)
+    if not ID[1].isdigit() or int(ID[1]) > len(listing):
+        await message.answer("<b>[Эй! Ничего не знаю!]</b>:")
+        return
+    from SQLite.SelectValues import FindExitsRow
+
+    if await FindExitsRow("requests", "ID", int(ID[1])) == 0:
+        await message.answer("<b>[Такой запрос не найден...]</b>:")
+        return
+    from SQLite.UpdateValues import UpdateValue
+    UpdateValue(message.from_user.id, "users", "status", 3)
+    UpdateValue(message.from_user.id, "users", "request", int(ID[1]))
+    from Structures.InputFormMenu import OutputInputFormMenu
+    await OutputInputFormMenu(message)
+
+
 async def OutputClaimToPlayer(message: Message):
-    kb = [
-        [KeyboardButton(text="Создать новую жалобу")],
-        [KeyboardButton(text="Назад")]
-    ]
+
+    kb = [[KeyboardButton(text="Создать новую жалобу")]]
+
+    from SQLite.SelectValues import SelectRequestsUser
+    listing = SelectRequestsUser(message.from_user.id)
+    for i in range(len(listing)):
+        kb.append([KeyboardButton(text=f"Запрос №{len(listing)-i}")])
+    kb.append([KeyboardButton(text="Назад")])
     placeholder = "Выберите жалобу:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
     await message.answer("<b>[Жалоба на игрока]</b>:", reply_markup=Keys)
