@@ -3,28 +3,67 @@ from aiogram import F
 
 from aiogram import Router
 
-from Middlewares.PrivateChatMiddleware import PrivateChatMiddleware
-from StatusFilter import StatusFilter
+
+from Filters.StatusFilter import StatusFilter
+from Structures.MenuNavigator import (OutputClaimToPlayerMenu, OutputBox1Menu, OutputBox2Menu, OutputBox3Menu,
+                                      OutputBox4Menu, OutputBox5Menu, OutputBox6Menu)
+from SQLite.UpdateValues import UpdateValue
+from SQLite.UpdateValues import UpdateValues
+from SQLite.SelectValues import SelectValues
+from Structures.Box1Menu import router as box1_router
+from Structures.Box2Menu import router as box2_router
+from Structures.Box3Menu import router as box3_router
+from Structures.Box4Menu import router as box4_router
+from Structures.Box5Menu import router as box5_router
+from Structures.Box6Menu import router as box6_router
 
 
 router = Router()
-router.message.middleware(PrivateChatMiddleware())
+router.include_routers(box1_router, box2_router, box3_router, box4_router, box5_router, box6_router)
 
 
 @router.message(F.text.contains("Назад"), StatusFilter(3))
 async def ButtonBack(message: Message):
-    from SQLite.UpdateValues import UpdateValue
+    userID = message.from_user.id
+    request = await SelectValues("request", "users", "userID = (?);", [userID])
+    status = await SelectValues("status", "requests", "ID = (?) AND userID = (?);", [int(request[0][0]), str(userID)])
+    if status[0][0] == "creating":
+        await UpdateValues("requests", "status = 'delete'", "ID = (?) AND userID = (?)", [int(request[0][0]), str(userID)])
     UpdateValue(message.from_user.id, "users", "request", "-")
     UpdateValue(message.from_user.id, "users", "status", 2)
-    from Structures.ClaimToPlayerMenu import OutputClaimToPlayer
-    await OutputClaimToPlayer(message)
+    await OutputClaimToPlayerMenu(message)
+
+
+@router.message(F.text.contains("Сохранить"), StatusFilter(3))
+async def ButtonBack(message: Message):
+    userID = message.from_user.id
+    request = await SelectValues("request", "users", "userID = (?);", [userID])
+    status = await SelectValues("status", "requests", "ID = (?) AND userID = (?);", [int(request[0][0]), str(userID)])
+    if status[0][0] == "creating":
+        await UpdateValues("requests", "status = 'await'", "ID = (?) AND userID = (?)", [int(request[0][0]), str(userID)])
+        listing = await SelectValues("*", "requests", "ID = (?) AND userID = (?)", [int(request[0][0]), str(userID)])
+        text =\
+            f"""<b>Запрос №{listing[0][0]:03d}</b>
+----------------
+<b>1) Ник игрока:</b> {listing[0][4]}
+<b>2) Ник нарушителя:</b> {listing[0][5]}
+<b>3) Тип нарушения:</b> {listing[0][6]}
+<b>4) Координаты:</b> {listing[0][7]}
+<b>5) Подробности:</b> {listing[0][9]}
+<b>6) Доказательства:</b> [---]
+----------------
+Тест... тут ещё две кнопки должны быть... Но я голоден!
+"""
+        await message.bot.send_message(chat_id=-1002691896200, message_thread_id=4, text=text)
+    UpdateValue(message.from_user.id, "users", "request", "-")
+    UpdateValue(message.from_user.id, "users", "status", 2)
+    await OutputClaimToPlayerMenu(message)
 
 
 @router.message(F.text.contains("Ваш ник:"), StatusFilter(3))
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 31)
-    from Structures.Box1Menu import OutputBox1Menu
     await OutputBox1Menu(message)
 
 
@@ -32,7 +71,6 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 32)
-    from Structures.Box2Menu import OutputBox2Menu
     await OutputBox2Menu(message)
 
 
@@ -40,7 +78,6 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 33)
-    from Structures.Box3Menu import OutputBox3Menu
     await OutputBox3Menu(message)
 
 
@@ -48,7 +85,6 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 34)
-    from Structures.Box4Menu import OutputBox4Menu
     await OutputBox4Menu(message)
 
 
@@ -56,7 +92,6 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 35)
-    from Structures.Box5Menu import OutputBox5Menu
     await OutputBox5Menu(message)
 
 
@@ -64,7 +99,6 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 36)
-    from Structures.Box6Menu import OutputBox6Menu
     await OutputBox6Menu(message)
 
 
@@ -78,7 +112,8 @@ async def OutputInputFormMenu(message: Message):
         [KeyboardButton(text=f"Координаты: {boxs[3]}")],
         [KeyboardButton(text=f"Доказательства: {boxs[4]}")],
         [KeyboardButton(text=f"Подробности: {boxs[5]}")],
-        [KeyboardButton(text=f"Назад = Сохранить (пока что)")]
+        [KeyboardButton(text=f"Сохранить")],
+        [KeyboardButton(text=f"Назад")]
     ]
     placeholder = "Выберите жалобу:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)

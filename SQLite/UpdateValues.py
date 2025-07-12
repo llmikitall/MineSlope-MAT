@@ -10,6 +10,13 @@ def UpdateValue(userID, table, title, value):
         conn.commit()
 
 
+async def UpdateValues(table, titles, where, values):
+    with OpenDatabase() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE " + table + " SET " + titles + " WHERE " + where, values)
+        conn.commit()
+
+
 def UpdateBoxValue(userID, title, value):
     with OpenDatabase() as conn:
         cur = conn.cursor()

@@ -9,13 +9,13 @@ async def CreateTableRequests():
                             ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             userID TEXT,
                             topicID TEXT,
-                            status TEXT DEFAULT 'await',
-                            box1 TEXT,
-                            box2 TEXT,
-                            box3 TEXT,
-                            box4 TEXT,
-                            box5 TEXT,
-                            box6 TEXT,
+                            status TEXT DEFAULT 'creating',
+                            box1 TEXT DEFAULT '-',
+                            box2 TEXT DEFAULT '-',
+                            box3 TEXT DEFAULT '-',
+                            box4 TEXT DEFAULT '-',
+                            box5 TEXT DEFAULT '-',
+                            box6 TEXT DEFAULT '-',
                             FOREIGN KEY (userID)
                                 REFERENCES users(userID)
                                 ON DELETE CASCADE

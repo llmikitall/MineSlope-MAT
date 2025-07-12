@@ -53,3 +53,12 @@ def SelectRequestsUser(userID):
         conn.commit()
         request = cur.fetchall()
     return request
+
+
+async def SelectValues(titles, table, where, values):
+    with OpenDatabase() as conn:
+        cur = conn.cursor()
+        cur.execute(" SELECT " + titles + " FROM " + table + " WHERE " + where, values)
+        conn.commit()
+        request = cur.fetchall()
+    return request

@@ -2,14 +2,11 @@ from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 from aiogram import F
 
 from aiogram import Router
-
-from Middlewares.PrivateChatMiddleware import PrivateChatMiddleware
-from StatusFilter import StatusFilter
+from Structures.MenuNavigator import OutputInputFormMenu
+from Filters.StatusFilter import StatusFilter
 from SQLite.UpdateValues import UpdateValue
-from Structures.InputFormMenu import OutputInputFormMenu
 
 router = Router()
-router.message.middleware(PrivateChatMiddleware())
 
 
 @router.message(F.text.contains("Назад"), StatusFilter(36))

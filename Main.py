@@ -33,18 +33,13 @@ async def main():
     BOT = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
 
     DP = Dispatcher()
-    DP.include_router(Commands.router)
-    DP.include_router(StartMenu.router)
-    DP.include_router(MainMenu.router)
-    DP.include_router(ClaimToPlayerMenu.router)
-    DP.include_router(InputFormMenu.router)
-    DP.include_router(Box1Menu.router)
-    DP.include_router(Box2Menu.router)
-    DP.include_router(Box3Menu.router)
-    DP.include_router(Box4Menu.router)
-    DP.include_router(Box5Menu.router)
-    DP.include_router(Box6Menu.router)
-    DP.include_router(BadMessage.router)
+    routers = (
+        Commands.router,
+        StartMenu.router,
+        BadMessage.router
+    )
+    for router in routers:
+        DP.include_router(router)
 
     logging.basicConfig(stream=sys.stdout)
     await DP.start_polling(BOT)
