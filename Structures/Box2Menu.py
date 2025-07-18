@@ -3,31 +3,26 @@ from aiogram import F
 
 from aiogram import Router
 
+from Filters.PrivateChatFilter import PrivateChatFilter
 from Filters.StatusFilter import StatusFilter
 from Structures.MenuNavigator import OutputInputFormMenu
 
 
 router = Router()
 
-
-@router.message(F.text.contains("Назад"), StatusFilter(32))
+@router.message(StatusFilter(32), F.text.contains("Назад"))
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 3)
     await OutputInputFormMenu(message)
 
 
-@router.message(F.text, StatusFilter(32))
+@router.message(StatusFilter(32), F.text)
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue, UpdateBoxValue
     UpdateBoxValue(message.from_user.id, "box2", message.text)
     UpdateValue(message.from_user.id, "users", "status", 3)
     await OutputInputFormMenu(message)
-
-
-@router.message(StatusFilter(32))
-async def ButtonBack(message: Message):
-    await message.answer("Не пойму... ты мне что пытаешься скинуть..?")
 
 
 async def OutputBox2Menu(message: Message):

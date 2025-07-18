@@ -10,15 +10,14 @@ from SQLite.UpdateValues import UpdateValue
 from Filters.PrivateChatFilter import PrivateChatFilter
 
 router = Router()
-router.message.filter(PrivateChatFilter())
 router.include_router(main_menu_router)
+router.message.filter(PrivateChatFilter())
 
 
 @router.message(CommandStart())
 async def CommandStart(message: Message):
     # /start - инициализация пользователей и возврат в главное меню.
     userID = message.from_user.id
-
     # Проверка пользователя в базе данных
     if await FindExitsRow("users", "userID", userID) == 0:
         await InsertValues("users", "(userID)", "(?)", [str(userID)])

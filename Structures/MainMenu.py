@@ -2,15 +2,17 @@ from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 from aiogram import F
 
 from aiogram import Router
+
+from Filters.PrivateChatFilter import PrivateChatFilter
 from Structures.MenuNavigator import OutputClaimToPlayerMenu
 from Filters.StatusFilter import StatusFilter
 from Structures.ClaimToPlayerMenu import router as claim_to_player_router
 
 router = Router()
-router.include_router(claim_to_player_router)
+router.include_routers(claim_to_player_router)
 
 
-@router.message(F.text.contains("Отправить жалобу"), StatusFilter(1))
+@router.message(StatusFilter(1), F.text.contains("Отправить жалобу"))
 async def SendMessageClaim(message: Message):
     from SQLite.UpdateValues import UpdateValue
     UpdateValue(message.from_user.id, "users", "status", 2)

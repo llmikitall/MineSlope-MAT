@@ -16,6 +16,7 @@ async def CreateTableRequests():
                             box4 TEXT DEFAULT '-',
                             box5 TEXT DEFAULT '-',
                             box6 TEXT DEFAULT '-',
+                            htmlText TEXT DEFAULT '-',
                             FOREIGN KEY (userID)
                                 REFERENCES users(userID)
                                 ON DELETE CASCADE

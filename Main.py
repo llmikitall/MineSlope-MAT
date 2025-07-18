@@ -8,9 +8,7 @@ from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 
 import Commands
-from Structures import StartMenu, MainMenu, BadMessage, ClaimToPlayerMenu, InputFormMenu, Box1Menu, \
-    Box3Menu, Box2Menu, Box4Menu, Box5Menu, Box6Menu
-
+from Structures import StartMenu, BadMessage
 
 async def main():
     from SQLite.FrequentActions import ExitsTable

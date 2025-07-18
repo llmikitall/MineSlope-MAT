@@ -11,6 +11,7 @@ from SQLite.SelectValues import FindAnyRowUsers
 class PrivateChatFilter(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         if message.chat.type == "private":
+            print(f"[{message.from_user.id}] {message.text}")
             return True
         else:
             return False

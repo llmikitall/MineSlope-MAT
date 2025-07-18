@@ -13,6 +13,7 @@ class StatusFilter(BaseFilter):
         self.status = status
 
     async def __call__(self, message: Message) -> bool:
+
         if self.status == FindAnyRowUsers(message.chat.id, "status"):
             return True
         else:
