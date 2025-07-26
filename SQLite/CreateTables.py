@@ -10,6 +10,8 @@ async def CreateTableRequests():
                             userID TEXT,
                             topicID TEXT,
                             status TEXT DEFAULT 'creating',
+                            editable INTEGER DEFAULT 1,
+                            messageID INTEGER DEFAULT 0,
                             box1 TEXT DEFAULT '-',
                             box2 TEXT DEFAULT '-',
                             box3 TEXT DEFAULT '-',

@@ -30,7 +30,14 @@ async def ButtonBack(message: Message):
 
 async def OutputBox3Menu(message: Message):
     kb = [
-        [KeyboardButton(text="Назад")]
+        [KeyboardButton(text="Гриферство")],
+        [KeyboardButton(text="Читы")],
+        [KeyboardButton(text="Чат")],
+        [KeyboardButton(text="PvP")],
+        [KeyboardButton(text="Дюп")],
+        [KeyboardButton(text="VPN")],
+        [KeyboardButton(text="Лагающие структуры")],
+        [KeyboardButton(text="◀ [Назад]")]
     ]
     placeholder = "Введите текст:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)

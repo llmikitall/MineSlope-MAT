@@ -3,14 +3,12 @@ from aiogram import F
 
 from aiogram import Router
 
-from Filters.PrivateChatFilter import PrivateChatFilter
 from Filters.StatusFilter import StatusFilter
 from SQLite.UpdateValues import UpdateValue
 from SQLite.InsertValues import InsertValues
 from SQLite.SelectValues import FindMaxRequest, SelectValues
 from Structures.MenuNavigator import OutputInputFormMenu, OutputMainMenu
-from Structures.InputFormMenu import router as input_form_router
-from SQLite.SelectValues import SelectRequestsUser
+from Structures.InputClaimToPlayer.InputFormMenu import router as input_form_router
 from SQLite.SelectValues import FindExitsRow
 
 

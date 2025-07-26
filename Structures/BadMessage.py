@@ -1,5 +1,6 @@
 import os.path
 import re
+from typing import List
 
 from aiogram import Router, F, Bot
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
@@ -11,19 +12,6 @@ from SQLite.UpdateValues import UpdateValues
 
 router = Router()
 router.message.filter(PrivateChatFilter())
-
-
-@router.message(F.photo)
-async def BadPhoto(message: Message):
-    DOWNLOAD_FOLDER = "Files"
-    os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-    photo = message.photo[-1]
-    file = await message.bot.get_file(photo.file_id)
-    file_path = file.file_path
-
-    file_name = f"file_{message.from_user.id}.jpg"
-    save_path = os.path.join(DOWNLOAD_FOLDER, file_name)
-    await message.bot.download_file(file_path, save_path)
 
 
 @router.message()
@@ -77,28 +65,29 @@ async def InlineAccept(callback: CallbackQuery):
         await callback.message.edit_reply_markup(reply_markup=builder.as_markup())
     elif callback.data == "accept_claim" or callback.data == "viewing_claim" or "denial_claim" in callback.data:
         match = re.search(r'(\d+)', callback.message.text)
-
+        ID = match.group(0)
+        await UpdateValues("requests", "editable = 0", "ID = (?)", [int(ID)])
         # ДОРАБОТАТЬ!! Нужно поле с сохранённой версией text html кодом
-        listing = await SelectValues("*", "requests", "ID = (?)", [int(match.group(0))])
+        additionally = await SelectValues("userID, status", "requests", "ID = (?)", [int(ID)])
 
         keyboard = InlineKeyboardBuilder()
         reason = ""
         if callback.data == "accept_claim":
             emoji = "✅"
-            await UpdateValues("requests", "status = 'accept'", "ID = (?)", [int(match.group(0))])
-            answer = f"✅ Ваш <b>запрос №{listing[0][0]}</b> был обработан! ✅"
-            await callback.bot.send_message(listing[0][1], answer)
+            await UpdateValues("requests", "status = 'accept'", "ID = (?)", [int(ID)])
+            answer = f"✅ Ваш <b>запрос №{ID}</b> был обработан! ✅"
+            await callback.bot.send_message(additionally[0][0], answer)
         elif "denial_claim" in callback.data:
             emoji = "❌"
-            await UpdateValues("requests", "status = 'deny'", "ID = (?)", [int(match.group(0))])
+            await UpdateValues("requests", "status = 'deny'", "ID = (?)", [int(ID)])
             if callback.data == "incorrectly_denial_claim":
-                reason = "Причина: Некорректно составлена жалоба"
+                reason = "\nПричина: Некорректно составлена жалоба"
             elif callback.data == "not_found_denial_claim":
-                reason = "Причина: Нарушитель не найден"
+                reason = "\nПричина: Нарушитель не найден"
             elif callback.data == "false_denial_claim":
-                reason = "Причина: Ложная тревога"
-            answer = f"❌ Ваш <b>запрос №{listing[0][0]}</b> был отменён! ❌\n{reason}"
-            await callback.bot.send_message(listing[0][1], answer)
+                reason = "\nПричина: Ложная тревога"
+            answer = f"❌ Ваш <b>запрос №{ID}</b> был отменён! ❌{reason}"
+            await callback.bot.send_message(additionally[0][0], answer)
         else:
             keyboard.add(InlineKeyboardButton(
                 text="⚙ Действия",
@@ -106,17 +95,18 @@ async def InlineAccept(callback: CallbackQuery):
             ))
             emoji = "🔍"
 
-            if listing[0][3] != "viewing":
-                answer = f"🔍 Ваш <b>запрос №{listing[0][0]}</b> принят на рассмотрение! 🔍\n{reason}"
-                await UpdateValues("requests", "status = 'viewing'", "ID = (?)", [int(match.group(0))])
-                await callback.bot.send_message(listing[0][1], answer)
-        currentText = listing[0][10]
+            if additionally[0][1] != "viewing":
+                answer = f"🔍 Ваш <b>запрос №{ID}</b> принят на рассмотрение! 🔍{reason}"
+                await UpdateValues("requests", "status = 'viewing'", "ID = (?)", [int(ID)])
+                await callback.bot.send_message(additionally[0][0], answer)
+        currentText = await SelectValues("htmlText", "requests", "ID = (?)", [int(ID)])
         text = re.sub(
             r':</b> .?',
-            f':</b> {emoji}\n{reason}',
-            currentText,
+            f':</b> {emoji}{reason}',
+            currentText[0][0],
             count=1
         )
+        await UpdateValues("requests", "htmlText = (?)", "ID = (?)", [text, int(ID)])
         await callback.message.edit_text(text, reply_markup=keyboard.as_markup())
 
 

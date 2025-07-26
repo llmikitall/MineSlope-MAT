@@ -9,35 +9,35 @@ async def OutputClaimToPlayerMenu(message):
 
 
 async def OutputInputFormMenu(message):
-    from Structures.InputFormMenu import OutputInputFormMenu
+    from Structures.InputClaimToPlayer.InputFormMenu import OutputInputFormMenu
     await OutputInputFormMenu(message)
 
 
 async def OutputBox1Menu(message):
-    from Structures.Box1Menu import OutputBox1Menu
+    from Structures.InputClaimToPlayer.Box1Menu import OutputBox1Menu
     await OutputBox1Menu(message)
 
 
 async def OutputBox2Menu(message):
-    from Structures.Box2Menu import OutputBox2Menu
+    from Structures.InputClaimToPlayer.Box2Menu import OutputBox2Menu
     await OutputBox2Menu(message)
 
 
 async def OutputBox3Menu(message):
-    from Structures.Box3Menu import OutputBox3Menu
+    from Structures.InputClaimToPlayer.Box3Menu import OutputBox3Menu
     await OutputBox3Menu(message)
 
 
 async def OutputBox4Menu(message):
-    from Structures.Box4Menu import OutputBox4Menu
+    from Structures.InputClaimToPlayer.Box4Menu import OutputBox4Menu
     await OutputBox4Menu(message)
 
 
 async def OutputBox5Menu(message):
-    from Structures.Box5Menu import OutputBox5Menu
+    from Structures.InputClaimToPlayer.Box5Menu import OutputBox5Menu
     await OutputBox5Menu(message)
 
 
 async def OutputBox6Menu(message):
-    from Structures.Box6Menu import OutputBox6Menu
+    from Structures.InputClaimToPlayer.Box6Menu import OutputBox6Menu
     await OutputBox6Menu(message)
