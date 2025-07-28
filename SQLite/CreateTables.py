@@ -12,6 +12,7 @@ async def CreateTableRequests():
                             status TEXT DEFAULT 'creating',
                             editable INTEGER DEFAULT 1,
                             messageID INTEGER DEFAULT 0,
+                            mediaID TEXT DEFAULT '-',
                             box1 TEXT DEFAULT '-',
                             box2 TEXT DEFAULT '-',
                             box3 TEXT DEFAULT '-',

@@ -7,7 +7,7 @@ from aiogram import Router
 
 from Filters.PrivateChatFilter import PrivateChatFilter
 from SQLite.SelectValues import SelectValues
-from SQLite.UpdateValues import UpdateBoxValue, UpdateValue
+from SQLite.UpdateValues import UpdateBoxValue, UpdateValue, UpdateValues
 from Structures.MenuNavigator import OutputInputFormMenu
 from Filters.StatusFilter import StatusFilter
 
@@ -22,6 +22,14 @@ async def ButtonBack(message: Message):
     await OutputInputFormMenu(message)
 
 
+@router.message(StatusFilter(35), F.text.contains("Удалить"))
+async def ButtonBack(message: Message):
+    ID = await SelectValues("request", "users", "userID = (?)", [message.from_user.id])
+    await UpdateValues("requests", "box5 = '-'", "ID = (?)", [int(ID[0][0])])
+    UpdateValue(message.from_user.id, "users", "status", 3)
+    await OutputInputFormMenu(message)
+
+
 @router.message(StatusFilter(35), F.photo)
 async def PhotoDownloader(message: Message):
     DOWNLOAD_FOLDER = "Files/Photos/"
@@ -32,27 +40,33 @@ async def PhotoDownloader(message: Message):
 
     file_name = f"file_{message.from_user.id}.{photo.file_id}.jpg"
     save_path = os.path.join(DOWNLOAD_FOLDER, file_name)
-    listing = await SelectValues("box5", "requests", "userID = (?) AND status = 'creating'",
-                                 [str(message.from_user.id)])
+
+    ID = await SelectValues("request", "users", "userID = (?)", [message.from_user.id])
+    listing = await SelectValues("box5", "requests", "ID = (?)",
+                                 [int(ID[0][0])])
     if listing[0][0] == "-":
         UpdateBoxValue(message.from_user.id, "box5", save_path)
     else:
         UpdateBoxValue(message.from_user.id, "box5", f"{listing[0][0]}\n{save_path}")
     await message.bot.download_file(file_path, save_path)
 
-    UpdateValue(message.from_user.id, "users", "status", 3)
-    await OutputInputFormMenu(message)
+    await OutputBox5Menu(message)
 
 
 @router.message(StatusFilter(35))
 async def ButtonBack(message: Message):
-    await message.answer("[Принимаются только фотографии!]")
+    await message.answer("<b>[Принимаются только фотографии!]</b>")
 
 
 async def OutputBox5Menu(message: Message):
-    kb = [
-        [KeyboardButton(text="Назад")]
-    ]
-    placeholder = "Введите текст:"
+    ID = await SelectValues("request", "users", "userID = (?)", [message.from_user.id])
+    box5 = await SelectValues("box5", "requests", "ID = (?)", [int(ID[0][0])])
+
+    kb = []
+    if box5[0][0] != "-":
+        kb.append([KeyboardButton(text="🗑️ [Удалить все фото]")])
+    kb.append([KeyboardButton(text="◀ [Назад]")])
+
+    placeholder = "Вставьте фото:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-    await message.answer("<b>[Ввод ника]</b>:", reply_markup=Keys)
+    await message.answer("<b>[Вставьте фото]</b>:\nМожно загрузить сразу несколько фото.", reply_markup=Keys)

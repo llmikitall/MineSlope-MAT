@@ -3,10 +3,9 @@ from aiogram import F
 
 from aiogram import Router
 
-from Filters.PrivateChatFilter import PrivateChatFilter
 from Structures.MenuNavigator import OutputInputFormMenu
 from Filters.StatusFilter import StatusFilter
-
+from Structures.TextVerification import TextVerification
 
 router = Router()
 
@@ -23,15 +22,17 @@ async def ButtonBack(message: Message):
 async def ButtonBack(message: Message):
     
     from SQLite.UpdateValues import UpdateValue, UpdateBoxValue
-    UpdateBoxValue(message.from_user.id, "box4", message.text)
+    text = await TextVerification(message.text)
+    UpdateBoxValue(message.from_user.id, "box4", text)
     UpdateValue(message.from_user.id, "users", "status", 3)
     await OutputInputFormMenu(message)
 
 
 async def OutputBox4Menu(message: Message):
     kb = [
-        [KeyboardButton(text="Назад")]
+        [KeyboardButton(text="◀ [Назад]")]
     ]
-    placeholder = "Введите текст:"
+    placeholder = "Введите координаты:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-    await message.answer("<b>[Ввод координат нарушения]</b>:", reply_markup=Keys)
+    await message.answer("<b>[Введите координаты нарушения]</b>:\nПример: <i>«x:12 y:44 z:33»</i>",
+                         reply_markup=Keys)

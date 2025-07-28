@@ -75,17 +75,17 @@ async def InlineAccept(callback: CallbackQuery):
         if callback.data == "accept_claim":
             emoji = "✅"
             await UpdateValues("requests", "status = 'accept'", "ID = (?)", [int(ID)])
-            answer = f"✅ Ваш <b>запрос №{ID}</b> был обработан! ✅"
+            answer = f"✅ Ваш <b>запрос №{ID}</b> был успешно принят и обработан! ✅"
             await callback.bot.send_message(additionally[0][0], answer)
         elif "denial_claim" in callback.data:
             emoji = "❌"
             await UpdateValues("requests", "status = 'deny'", "ID = (?)", [int(ID)])
             if callback.data == "incorrectly_denial_claim":
-                reason = "\nПричина: Некорректно составлена жалоба"
+                reason = "\n<b>Причина</b>: Некорректно составлена жалоба"
             elif callback.data == "not_found_denial_claim":
-                reason = "\nПричина: Нарушитель не найден"
+                reason = "\n<b>Причина</b>: Нарушитель не найден"
             elif callback.data == "false_denial_claim":
-                reason = "\nПричина: Ложная тревога"
+                reason = "\n<b>Причина</b>: Ложная тревога"
             answer = f"❌ Ваш <b>запрос №{ID}</b> был отменён! ❌{reason}"
             await callback.bot.send_message(additionally[0][0], answer)
         else:
@@ -96,7 +96,7 @@ async def InlineAccept(callback: CallbackQuery):
             emoji = "🔍"
 
             if additionally[0][1] != "viewing":
-                answer = f"🔍 Ваш <b>запрос №{ID}</b> принят на рассмотрение! 🔍{reason}"
+                answer = f"🔍 Ваш <b>запрос №{ID}</b> принят на рассмотрение администрацией! 🔍"
                 await UpdateValues("requests", "status = 'viewing'", "ID = (?)", [int(ID)])
                 await callback.bot.send_message(additionally[0][0], answer)
         currentText = await SelectValues("htmlText", "requests", "ID = (?)", [int(ID)])

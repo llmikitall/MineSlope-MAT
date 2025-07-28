@@ -11,7 +11,6 @@ from Structures.MenuNavigator import OutputInputFormMenu, OutputMainMenu
 from Structures.InputClaimToPlayer.InputFormMenu import router as input_form_router
 from SQLite.SelectValues import FindExitsRow
 
-
 router = Router()
 router.include_router(input_form_router)
 
@@ -46,19 +45,36 @@ async def ButtonRequest(message: Message):
 
     # Проверка от букв и SQL-инъекции
     try:
-        ID = int(message.text.split("№")[1])
+        ID = int(message.text.split("№")[1][:-1])
     except (IndexError, ValueError):
-        await message.answer(f"<b>[Некорректный номер запроса]</b>:")
+        await message.answer(f"<b>[Некорректный номер запроса]</b>")
         return
 
     # Проверяем наличие такого запроса. (Тут нужно переделать...
     #   ...надо SELECT ID FROM requests WHERE userID = ?; и код сократится)
     if await FindExitsRow("requests", "ID", int(ID)) == 0:
-        await message.answer("<b>[Запрос не найден или не принадлежит Вам]</b>:")
+        await message.answer("<b>[Запрос не найден или не принадлежит Вам]</b>")
         return
 
+    additional = await SelectValues("editable, status", "requests", "ID = (?)", [int(ID)])
+    if additional[0][0] == 1 and additional[0][1] != "creating":
+        exists = await SelectValues("ID", "requests", "ID = (?)", [0-int(ID)])
+        if not exists:
+            boxs = await SelectValues("userID, topicID, status, messageID, mediaID, box1, box2, box3, box4, box5, box6,"
+                                      "htmlText",
+                                      "requests",
+                                      "ID = (?)",
+                                      [int(ID)])
+            await InsertValues("requests",
+                               "(ID, userID, topicID, status, messageID, mediaID, box1, box2, box3, box4, box5, box6, "
+                               "htmlText)",
+                               "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                               [0-int(ID), boxs[0][0], boxs[0][1], boxs[0][2], boxs[0][3], boxs[0][4], boxs[0][5],
+                                boxs[0][6], boxs[0][7], boxs[0][8], boxs[0][9], boxs[0][10], boxs[0][11]])
+        UpdateValue(userID, "users", "request", 0-int(ID))
     # Изменяем request и status пользователя
-    UpdateValue(userID, "users", "request", int(ID))
+    else:
+        UpdateValue(userID, "users", "request", int(ID))
 
     UpdateValue(userID, "users", "status", 3)
     await OutputInputFormMenu(message)
@@ -68,13 +84,15 @@ async def OutputClaimToPlayer(message: Message):
     userID = message.from_user.id
 
     # Создаём кнопку "Создать..." в самый верх
-    kb = [[KeyboardButton(text="Создать новую жалобу")]]
+    kb = [[KeyboardButton(text="📝 [Создать новый запрос]")]]
 
     # Получаем все запросы пользователя и сортируем (чтобы более новые запросы были сверху)
     listing = await SelectValues("ID, status", "requests", "userID = (?)", [str(userID)])
     listing.sort(reverse=True)
 
     for i in range(len(listing)):
+        if listing[i][0] < 0:
+            continue
         emoji = "⚙"
         if listing[i][1] == "accept":
             emoji = "✅"
@@ -83,11 +101,11 @@ async def OutputClaimToPlayer(message: Message):
         elif listing[i][1] == "viewing":
             emoji = "🔍"
 
-        kb.append([KeyboardButton(text=f"{emoji} Запрос №{listing[i][0]:03d}")])
+        kb.append([KeyboardButton(text=f"{emoji} [Запрос №{listing[i][0]:03d}]")])
 
-    kb.append([KeyboardButton(text="Назад")])
+    kb.append([KeyboardButton(text="◀ [Назад]")])
 
     # Оформляем вывод
-    placeholder = "Выберите жалобу:"
+    placeholder = "Выберите запрос:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-    await message.answer("<b>[Текущие Ваши запросы]</b>:", reply_markup=Keys)
+    await message.answer("<b>[Выберите запрос или создайте новый]</b>:", reply_markup=Keys)

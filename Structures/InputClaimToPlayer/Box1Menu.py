@@ -3,7 +3,7 @@ from aiogram import F
 
 from aiogram import Router
 
-from Filters.PrivateChatFilter import PrivateChatFilter
+from Structures.TextVerification import TextVerification
 from Structures.MenuNavigator import OutputInputFormMenu
 from Filters.StatusFilter import StatusFilter
 
@@ -21,15 +21,16 @@ async def ButtonBack(message: Message):
 @router.message(StatusFilter(31), F.text)
 async def ButtonBack(message: Message):
     from SQLite.UpdateValues import UpdateValue, UpdateBoxValue
-    UpdateBoxValue(message.from_user.id, "box1", message.text)
+    text = await TextVerification(message.text)
+    UpdateBoxValue(message.from_user.id, "box1", text)
     UpdateValue(message.from_user.id, "users", "status", 3)
     await OutputInputFormMenu(message)
 
 
 async def OutputBox1Menu(message: Message):
     kb = [
-        [KeyboardButton(text="Назад")]
+        [KeyboardButton(text="◀ [Назад]")]
     ]
-    placeholder = "Введите текст:"
+    placeholder = "Введите ник:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-    await message.answer("<b>[Ввод ника]</b>:", reply_markup=Keys)
+    await message.answer("<b>[Введите Ваш ник]</b>:", reply_markup=Keys)
