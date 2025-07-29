@@ -16,7 +16,7 @@ router.message.filter(PrivateChatFilter())
 
 @router.message()
 async def BadMessage(message: Message):
-    await message.answer("<b>Не пойму...</b> что ты вводишь?")
+    await message.answer("<b>Не пойму...</b> что ты вводишь? ")
     await message.answer_sticker("CAACAgIAAxkBAAEHoX1mucVzt3Z7abLiXoLUUS6Rf2lxNgACEAADwDZPE-qBiinxHwLoNQQ")
 
 

@@ -38,7 +38,7 @@ async def ButtonCreate(message: Message):
     await OutputInputFormMenu(message)
 
 
-@router.message(StatusFilter(2), F.text.contains("Запрос №"))
+@router.message(StatusFilter(2), F.text.contains("Жалоба №"))
 async def ButtonRequest(message: Message):
     # Получаем номер запроса, который ввёл пользователь
     userID = message.from_user.id
@@ -47,13 +47,13 @@ async def ButtonRequest(message: Message):
     try:
         ID = int(message.text.split("№")[1][:-1])
     except (IndexError, ValueError):
-        await message.answer(f"<b>[Некорректный номер запроса]</b>")
+        await message.answer(f"<b>[Некорректный номер жалобы]</b>")
         return
 
     # Проверяем наличие такого запроса. (Тут нужно переделать...
     #   ...надо SELECT ID FROM requests WHERE userID = ?; и код сократится)
     if await FindExitsRow("requests", "ID", int(ID)) == 0:
-        await message.answer("<b>[Запрос не найден или не принадлежит Вам]</b>")
+        await message.answer("<b>[Жалоба не найдена или не принадлежит Вам]</b>")
         return
 
     additional = await SelectValues("editable, status", "requests", "ID = (?)", [int(ID)])
@@ -84,7 +84,7 @@ async def OutputClaimToPlayer(message: Message):
     userID = message.from_user.id
 
     # Создаём кнопку "Создать..." в самый верх
-    kb = [[KeyboardButton(text="📝 [Создать новый запрос]")]]
+    kb = [[KeyboardButton(text="📝 [Создать новую жалобу]")]]
 
     # Получаем все запросы пользователя и сортируем (чтобы более новые запросы были сверху)
     listing = await SelectValues("ID, status", "requests", "userID = (?)", [str(userID)])
@@ -101,11 +101,11 @@ async def OutputClaimToPlayer(message: Message):
         elif listing[i][1] == "viewing":
             emoji = "🔍"
 
-        kb.append([KeyboardButton(text=f"{emoji} [Запрос №{listing[i][0]:03d}]")])
+        kb.append([KeyboardButton(text=f"{emoji} [Жалоба №{listing[i][0]:03d}]")])
 
     kb.append([KeyboardButton(text="◀ [Назад]")])
 
     # Оформляем вывод
-    placeholder = "Выберите запрос:"
+    placeholder = "Выберите жалобу:"
     Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-    await message.answer("<b>[Выберите запрос или создайте новый]</b>:", reply_markup=Keys)
+    await message.answer("<b>[Выберите жалобу]</b>:", reply_markup=Keys)
