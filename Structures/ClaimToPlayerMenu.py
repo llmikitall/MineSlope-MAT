@@ -84,7 +84,8 @@ async def OutputClaimToPlayer(message: Message):
     userID = message.from_user.id
 
     # Создаём кнопку "Создать..." в самый верх
-    kb = [[KeyboardButton(text="📝 [Создать новую жалобу]")]]
+    kb = [[KeyboardButton(text="📝 [Создать новую жалобу]")],
+          [KeyboardButton(text="◀ [Назад]")]]
 
     # Получаем все запросы пользователя и сортируем (чтобы более новые запросы были сверху)
     listing = await SelectValues("ID, status", "requests", "userID = (?)", [str(userID)])
@@ -102,8 +103,6 @@ async def OutputClaimToPlayer(message: Message):
             emoji = "🔍"
 
         kb.append([KeyboardButton(text=f"{emoji} [Жалоба №{listing[i][0]:03d}]")])
-
-    kb.append([KeyboardButton(text="◀ [Назад]")])
 
     # Оформляем вывод
     placeholder = "Выберите жалобу:"

@@ -8,7 +8,6 @@ from SQLite.DeleteValues import DeleteValues
 from SQLite.SelectValues import SelectValues
 from SQLite.UpdateValues import UpdateValues
 from Structures.InputClaimToPlayer.AutoReplies import RequestBeenProcessed, TextEdited, PhotoEdited, RequestCreating
-from Structures.InputClaimToPlayer.Controllers.PreviewTextController import PreviewText
 
 
 async def SaveButtonController(message: Message, text: str, ID: int, boxs: list):
@@ -19,6 +18,7 @@ async def SaveButtonController(message: Message, text: str, ID: int, boxs: list)
     # Проверка на актуальное редактирование оригинальной жалобы
     if original[0][0] == 0:
         await message.answer(RequestBeenProcessed)
+        await DeleteValues("requests", "ID = (?)", [ID])
         return
 
     # Если оригинальный htmlText отличается от текущего htmlText - изменение!
@@ -144,48 +144,12 @@ async def CreatingButtonController(message: Message, text: str, ID: int, box5: s
     await message.answer(RequestCreating)
 
 
-async def OutputMessageWithMedia(message: Message):
-    ID = await SelectValues("request", "users", "userID = (?)", [message.from_user.id])
-    additionally = await SelectValues("editable, htmlText",
-                                      "requests",
-                                      "ID = (?)",
-                                      [int(ID[0][0])])
-    boxs = await SelectValues("box1, box2, box3, box4, box5, box6",
-                              "requests",
-                              "ID = (?)",
-                              [int(ID[0][0])])
+async def OutputMessageWithMedia(message: Message, text: str, keys: ReplyKeyboardMarkup, box4):
 
-    if additionally[0][0] == 1:
-        kb = [
-            [
-                KeyboardButton(text=f"👤 [Мой ник]: {'✖' if boxs[0][0] == '-' else '✔'}"),
-                KeyboardButton(text=f"💢 [Его ник]: {'✖' if boxs[0][1] == '-' else '✔'}")
-            ],
-            [
-                KeyboardButton(text=f"📌 [Тип]: {'✖' if boxs[0][2] == '-' else '✔'}"),
-                KeyboardButton(text=f"🌐 [Коорд.]: {'✖' if boxs[0][3] == '-' else '✔'}")
-            ],
-            [
-                KeyboardButton(text=f"📷 [Фото]: {'✖' if boxs[0][4] == '-' else '✔'}"),
-                KeyboardButton(text=f"📋 [Детали]: {'✖' if boxs[0][5] == '-' else '✔'}")
-            ],
-            [
-                KeyboardButton(text=f"◀ [Назад]"),
-                KeyboardButton(text=f"[Сохранить] ▶")
-            ]
-        ]
+    messageID = await message.answer(text, reply_markup=keys)
 
-        text = await PreviewText(message, ID, boxs)
-    else:
-        kb = [[KeyboardButton(text=f"◀ [Назад]")]]
-        text = additionally[0][1]
-    placeholder = "Выберите поле:"
-    Keys = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, input_field_placeholder=placeholder)
-
-    messageID = await message.answer(text, reply_markup=Keys)
-
-    if boxs[0][4] != "-":
-        splitListing = boxs[0][4].split("\n")
+    if box4 != "-":
+        splitListing = box4.split("\n")
         existing_photos = [path for path in splitListing if os.path.exists(path)]
         if existing_photos:
             media = [InputMediaPhoto(media=FSInputFile(path)) for path in existing_photos]
@@ -193,3 +157,51 @@ async def OutputMessageWithMedia(message: Message):
                 media=media,
                 reply_to_message_id=messageID.message_id
             )
+
+
+async def PreviewText(message: Message, ID, boxs):
+    additionally = await SelectValues("editable, htmlText",
+                                      "requests",
+                                      "ID = (?)",
+                                      [int(ID[0][0])])
+    if additionally[0][0] == 1:
+        separator = "--------------------------------\n"
+
+        # Составление обязательной структуры жалобы
+        text = (f"{separator}"
+                f"<b>Жалоба №{abs(int(ID[0][0])):03d}:</b> ⚙\n"
+                f"{separator}"
+                f"  <b>1) Ник игрока:</b> {boxs[0][0]}\n"
+                f"  <b>2) Ник нарушителя:</b> {boxs[0][1]}\n"
+                f"  <b>3) Тип нарушения:</b> {boxs[0][2]}\n")
+
+        # Добавление необязательной структуры жалобы, где index - номер пункта
+        index = 3
+
+        if boxs[0][3] != "-":
+            index += 1
+            text += f"  <b>{index}) Координаты:</b> {boxs[0][3]}\n"
+        if boxs[0][5] != "-":
+            index += 1
+            text += f"  <b>{index}) Детали:</b> {boxs[0][5]}\n"
+        if boxs[0][4] != "-":
+            index += 1
+            text += f"  <b>{index}) Фотофиксация:</b> {'-' if boxs[0][4] == '-' else '✅'}\n"
+
+        # Гипперссылка для {✍️ Написано: fullname}
+        botLink = "<a href='https://t.me/MineSlopeBot'>✍️</a>"
+
+        fullName = message.from_user.full_name
+        user_link = (
+            f"<a href='https://t.me/{message.from_user.username}'>{fullName}</a>"
+            if message.from_user.username
+            else fullName
+        )
+
+        text += (f"{separator}"
+                 f"{botLink} <b>Написано</b>: {user_link}\n"
+                 f"{separator}")
+    else:
+        text = additionally[0][1]
+
+    return text
