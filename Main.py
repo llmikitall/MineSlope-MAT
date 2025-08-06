@@ -5,6 +5,7 @@ import sys
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 import Commands
@@ -28,7 +29,8 @@ async def main():
         print("[-] Файл .env не найден!")
 
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    BOT = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+    BOT = Bot(token=BOT_TOKEN,
+            default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     DP = Dispatcher()
     routers = (

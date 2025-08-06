@@ -24,7 +24,10 @@ async def OutputMainMenu(message: Message):
     from SQLite.SelectValues import FindAnyRowUsers
     if FindAnyRowUsers(message.from_user.id, "oMainMenu") == 0:
         sep = "-------------------------------------------------------\n"
-        text = "Добро пожаловать!"
+        text = ("<b>[Добро пожаловать!]</b>\n"
+        "   Я - Минеслопик. Помогаю игрокам, упрощая работу нашей администрации"
+        " и игрокам! Умею на данный момент только составлять жалобы...\n"
+        "   <i>Прошу, не будьте ко мне строги!</i>\n")
         await message.answer(sep + text + sep)
         from SQLite.UpdateValues import UpdateValue
         UpdateValue(message.from_user.id, "users", "oMainMenu", 1)
